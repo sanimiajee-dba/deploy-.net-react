@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  api:
+    build: ./api
+    container_name: demo-api
+    restart: unless-stopped
+    environment:
+      # Oracle 19c is running on the HOST (192.168.0.231), not in a container.
+      # Change credentials/service name to match your real DB setup.
+      - ORACLE_CONNECTION_STRING=User Id=demo_user;Password=demo_pass;Data Source=192.168.0.231:1521/ORCLPDB1;
+      - ASPNETCORE_ENVIRONMENT=Production
+    expose:
+      - "8080"     # only reachable inside the docker network, not from outside
+
+  web:
+    build: ./web
+    container_name: demo-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "8088:80"  # <-- your requested port: http://192.168.0.231:8088
+
+networks:
+  default:
+    name: demo-net
